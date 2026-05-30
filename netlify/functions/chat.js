@@ -17,31 +17,26 @@ exports.handler = async (event) => {
 
   try {
     const { messages, system } = JSON.parse(event.body);
-    const apiKey = process.env.ANTHROPIC_API_KEY;
 
-    if (!apiKey) {
-      return {
-        statusCode: 500,
-        body: JSON.stringify({ error: 'API key no configurada' })
-      };
-    }
+    const historial = messages.map(m => ({
+      role: m.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: m.content }]
+    }));
 
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        system,
-        messages
-      })
-    });
+    const response = await fetch(
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyAQ_Ab8RN6IIszav5E7fLGQCbZUWYumWg4MnywJ1O20Lxt0gVI81QQ',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          system_instruction: { parts: [{ text: system }] },
+          contents: historial
+        })
+      }
+    );
 
     const data = await response.json();
+    const texto = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No pude procesar la respuesta.';
 
     return {
       statusCode: 200,
@@ -49,7 +44,9 @@ exports.handler = async (event) => {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*'
       },
-      body: JSON.stringify(data)
+      body: JSON.stringify({
+        content: [{ type: 'text', text: texto }]
+      })
     };
   } catch (err) {
     return {
