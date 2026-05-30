@@ -24,13 +24,10 @@ exports.handler = async (event) => {
     }));
 
     const response = await fetch(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AQ.Ab8RN6Kv-UC4AkcoSpbKmFBQ0WuFT7nqx2v4qIDNE07jvVUfiQ',
       {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-goog-api-key': 'AQ.Ab8RN6Kv-UC4AkcoSpbKmFBQ0WuFT7nqx2v4qIDNE07jvVUfiQ'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           system_instruction: { parts: [{ text: system }] },
           contents: historial
